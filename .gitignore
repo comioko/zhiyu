@@ -1,0 +1,21 @@
+# 排除 application*.yml 和 src/main/resources 下的 yml/yaml（可能含敏感信息）
+application*.yml
+application*.yaml
+src/main/resources/**/*.yml
+src/main/resources/**/*.yaml
+
+# RSA 密钥（JWT 签名私钥/公钥，不上传远程仓库）
+**/keys/
+*.pem
+
+# IDE 配置
+.idea/
+.vscode/
+*.iml
+
+# 系统文件
+.DS_Store
+Thumbs.db
+
+# Vite 临时文件
+*.timestamp-*.mjs
