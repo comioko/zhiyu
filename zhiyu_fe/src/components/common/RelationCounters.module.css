@@ -1,25 +1,41 @@
 .wrapper {
   display: flex;
   align-items: center;
-  gap: 18px;
+  flex-wrap: wrap;
+  gap: 8px;
 }
 
 .item {
   display: inline-flex;
   align-items: baseline;
-  gap: 8px;
-  color: var(--color-text-muted);
+  gap: 6px;
+  padding: 8px 14px;
+  border-radius: var(--radius-pill);
+  background: var(--color-cream);
+  border: var(--stroke-thin);
+  color: var(--color-cocoa-deep);
+  box-shadow: var(--shadow-toy-sm);
 }
 
 .number {
-  color: var(--color-text-strong);
   font-weight: 700;
+  font-size: 15px;
+  font-variant-numeric: tabular-nums;
 }
 
 .label {
   font-size: 12px;
+  color: var(--color-cocoa-soft);
+  font-weight: 600;
 }
 
 .clickable {
   cursor: pointer;
+  transition: transform 0.18s ease-out, box-shadow 0.18s ease-out, background 0.18s ease-out;
+}
+
+.clickable:hover {
+  transform: translate(-1px, -1px);
+  background: var(--color-sky);
+  box-shadow: var(--shadow-toy);
 }

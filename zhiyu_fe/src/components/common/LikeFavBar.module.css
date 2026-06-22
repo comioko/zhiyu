@@ -1,34 +1,53 @@
 ._bar {
   display: inline-flex;
   align-items: center;
-  gap: 14px;
+  gap: 10px;
   font-size: 13px;
-  color: var(--color-text-muted);
+  color: var(--color-cocoa-soft);
 }
 
 .btn {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 0;
-  border: 0;
-  outline: none;
-  background: transparent;
+  padding: 6px 12px;
+  border: var(--stroke-thin);
+  border-radius: var(--radius-pill);
+  background: var(--color-cream);
+  color: var(--color-cocoa-deep);
   cursor: pointer;
   user-select: none;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  box-shadow: var(--shadow-toy-sm);
+  transition: transform 0.18s ease-out, box-shadow 0.18s ease-out, background 0.18s ease-out;
 }
 
-.btn:hover { color: var(--color-text); }
+.btn:hover:not(.disabled) {
+  transform: translate(-1px, -1px);
+  box-shadow: var(--shadow-toy);
+}
 
-.liked { color: #e74c3c; }
-.faved { color: var(--color-primary-strong); }
+.btn:active:not(.disabled) {
+  transform: translate(1px, 1px);
+}
+
+.liked {
+  background: #FBE3E3;
+  border-color: var(--color-warning-deep);
+  color: var(--color-warning-deep);
+}
+
+.faved {
+  background: var(--color-peach);
+  border-color: var(--color-cocoa);
+  color: var(--color-cocoa-deep);
+}
 
 .count {
-  min-width: 10px;
-}
-
-.compact .btn {
-  padding: 0;
+  min-width: 12px;
+  font-variant-numeric: tabular-nums;
 }
 
 .disabled {

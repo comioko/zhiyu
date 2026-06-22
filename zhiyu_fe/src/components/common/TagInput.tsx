@@ -1,4 +1,5 @@
 import { useState, KeyboardEvent, ChangeEvent } from "react";
+import Tag from "@/components/ui/Tag";
 import styles from "./TagInput.module.css";
 
 type TagInputProps = {
@@ -28,7 +29,6 @@ const TagInput = ({ id, value, onChange, placeholder, className }: TagInputProps
       e.preventDefault();
       addTag(text);
     } else if (e.key === "Backspace" && text === "" && value.length > 0) {
-      // 便捷删除最后一个标签
       onChange(value.slice(0, -1));
     }
   };
@@ -38,7 +38,7 @@ const TagInput = ({ id, value, onChange, placeholder, className }: TagInputProps
   };
 
   const removeTag = (t: string) => {
-    onChange(value.filter((x) => x !== t));
+    onChange(value.filter(x => x !== t));
   };
 
   return (
@@ -51,23 +51,19 @@ const TagInput = ({ id, value, onChange, placeholder, className }: TagInputProps
         onKeyDown={handleKeyDown}
         placeholder={placeholder ?? "输入标签后按回车"}
       />
-      {value.length > 0 && (
+      {value.length > 0 ? (
         <div className={styles.chips}>
           {value.map((tag, idx) => (
-            <span className={styles.chip} key={`${tag}-${idx}`}>
-              <span className={styles.chipText}>{tag}</span>
-              <button
-                type="button"
-                className={styles.remove}
-                aria-label={`移除 ${tag}`}
-                onClick={() => removeTag(tag)}
-              >
-                ×
-              </button>
-            </span>
+            <Tag
+              key={`${tag}-${idx}`}
+              variant="sky"
+              onRemove={() => removeTag(tag)}
+            >
+              {tag}
+            </Tag>
           ))}
         </div>
-      )}
+      ) : null}
     </div>
   );
 };

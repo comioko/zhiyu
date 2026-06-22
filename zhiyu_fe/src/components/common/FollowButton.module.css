@@ -2,31 +2,47 @@
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  padding: 8px 14px;
-  border-radius: 999px;
-  border: 1px solid rgba(255, 138, 65, 0.24);
-  background: rgba(255, 255, 255, 0.9);
-  color: var(--color-text-strong);
+  padding: 8px 16px;
+  border-radius: var(--radius-pill);
+  border: var(--stroke-thin);
+  background: var(--color-cream);
+  color: var(--color-cocoa-deep);
   font-size: 13px;
-  font-weight: 600;
+  font-weight: 700;
   cursor: pointer;
-  transition: transform 0.15s ease, box-shadow 0.2s ease, background 0.2s ease;
+  font-family: inherit;
+  box-shadow: var(--shadow-toy-sm);
+  transition: transform 0.18s ease-out, box-shadow 0.18s ease-out, background 0.18s ease-out;
 }
 
-.btn:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 10px 24px rgba(26, 26, 44, 0.10);
+.btn:hover:not(:disabled) {
+  transform: translate(-1px, -1px);
+  box-shadow: var(--shadow-toy);
+}
+
+.btn:active:not(:disabled) {
+  transform: translate(1px, 1px);
+  box-shadow: var(--shadow-toy-sm);
+}
+
+.btn:disabled {
+  cursor: wait;
+  opacity: 0.6;
 }
 
 .following {
-  color: var(--color-primary-strong);
-  border-color: rgba(255, 138, 65, 0.36);
-  background: rgba(255, 248, 238, 0.8);
+  background: var(--color-matcha);
+  border-color: var(--color-cocoa);
 }
 
 .mutualBadge {
-  font-size: 12px;
-  color: var(--color-text-muted);
+  font-size: 11px;
+  color: var(--color-cocoa-deep);
+  font-weight: 700;
+  padding: 1px 6px;
+  background: var(--color-cream);
+  border-radius: 8px;
+  border: 1.5px solid var(--color-cocoa);
 }
 
 .icon {

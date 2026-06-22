@@ -1,0 +1,82 @@
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border-radius: var(--radius-pill);
+  border: var(--stroke-thin);
+  background: var(--color-cream);
+  color: var(--color-cocoa-deep);
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1;
+  white-space: nowrap;
+  cursor: pointer;
+  user-select: none;
+  font-family: inherit;
+  transition: transform 0.15s ease-out, box-shadow 0.15s ease-out, background 0.15s ease-out;
+  box-shadow: var(--shadow-toy-sm);
+}
+
+.chip:hover {
+  transform: translate(-1px, -1px);
+  box-shadow: var(--shadow-toy);
+}
+
+.chip:active {
+  transform: translate(1px, 1px);
+  box-shadow: var(--shadow-toy-sm);
+}
+
+/* 选中态 */
+.selected {
+  background: var(--color-cocoa);
+  color: var(--color-cream);
+  border-color: var(--color-cocoa-deep);
+}
+
+/* 不同色调 */
+.toneSky.selected {
+  background: var(--color-sky);
+  color: var(--color-cocoa-deep);
+  border-color: var(--color-cocoa);
+}
+
+.toneMatcha.selected {
+  background: var(--color-matcha);
+  color: var(--color-cocoa-deep);
+}
+
+.tonePeach.selected {
+  background: var(--color-peach);
+  color: var(--color-cocoa-deep);
+}
+
+/* 关闭按钮 */
+.removeBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: transparent;
+  border: none;
+  color: inherit;
+  cursor: pointer;
+  font-size: 14px;
+  line-height: 1;
+  padding: 0;
+  font-family: inherit;
+}
+
+.removeBtn:hover {
+  background: rgba(0, 0, 0, 0.08);
+}
+
+/* 禁用 */
+.chip:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+  pointer-events: none;
+}

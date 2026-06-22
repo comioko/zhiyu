@@ -22,6 +22,7 @@ const LearningPage = () => {
     >
       <div className={styles.emptyCard}>
         <div className={styles.icon}>📚</div>
+        <img src="/illustrations/book.svg" alt="" className={styles.illustration} />
         <div className={styles.title}>{learningEmptyState.title}</div>
         <div className={styles.description}>{learningEmptyState.description}</div>
         <button type="button" className="ghost-button">

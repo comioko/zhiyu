@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import type { ReactNode } from "react";
 import clsx from "clsx";
 import { Link } from "react-router-dom";
-import Tag from "@/components/common/Tag";
+import Tag from "@/components/common/Tag"; // 实际从 ui/Tag re-export
 import { HeartIcon } from "@/components/icons/Icon";
 import { useAuth } from "@/context/AuthContext";
 import { knowpostService } from "@/services/knowpostService";

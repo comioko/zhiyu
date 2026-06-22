@@ -3,18 +3,18 @@
   flex-direction: column;
   gap: 32px;
   padding: 32px;
-  border-radius: 32px;
-  background: rgba(255, 255, 255, 0.95);
-  box-shadow: 0 18px 42px rgba(26, 26, 44, 0.08);
+  border-radius: var(--radius-panel);
+  background: var(--color-cream);
+  box-shadow: var(--shadow-toy);
   position: relative; /* 让预览层仅覆盖卡片区域 */
 }
 
 .heroImage {
   width: 100%;
-  border-radius: 28px;
+  border-radius: var(--radius-button);
   max-height: 360px;
   object-fit: cover;
-  box-shadow: 0 18px 42px rgba(0, 0, 0, 0.12);
+  border: var(--stroke-base);
 }
 
 .titleBlock {
@@ -33,27 +33,27 @@
 .title {
   font-size: 28px;
   font-weight: 700;
-  color: var(--color-text-strong);
+  color: var(--color-cocoa-deep);
 }
 
 .meta {
   display: flex;
   flex-wrap: wrap;
   gap: 16px;
-  color: var(--color-text-muted);
+  color: var(--color-cocoa-soft);
 }
 
 .authorAvatar {
   width: 36px;
   height: 36px;
-  border-radius: 12px;
+  border-radius: var(--radius-input);
   object-fit: cover;
 }
 
 .authorName {
   font-size: 16px;
   font-weight: 600;
-  color: var(--color-text-strong);
+  color: var(--color-cocoa-deep);
 }
 
 .stats {
@@ -75,7 +75,7 @@
 
 .body {
   background: rgba(255, 248, 238, 0.8);
-  border-radius: 24px;
+  border-radius: var(--radius-button);
   padding: 28px;
   line-height: 1.7;
   color: var(--color-text);
@@ -90,31 +90,31 @@
 .markdown h2,
 .markdown h3 {
   margin: 18px 0 12px;
-  color: var(--color-text-strong);
+  color: var(--color-cocoa-deep);
 }
 
 .markdown p { margin: 12px 0; }
 .markdown ul,
 .markdown ol { margin: 12px 0; padding-left: 1.4em; }
-.markdown a { color: var(--color-primary); text-decoration: underline; }
+.markdown a { color: var(--color-cream); text-decoration: underline; }
 
 .markdown blockquote {
   margin: 12px 0;
   padding-left: 12px;
   border-left: 3px solid #ddd;
-  color: var(--color-text-muted);
+  color: var(--color-cocoa-soft);
 }
 
 .markdown img {
   max-width: 100%;
   height: auto;
-  border-radius: 12px;
+  border-radius: var(--radius-input);
 }
 
 .markdown pre {
   background: #f6f8fa;
   padding: 12px 14px;
-  border-radius: 12px;
+  border-radius: var(--radius-input);
   overflow: auto;
 }
 
@@ -140,9 +140,9 @@
   position: relative;
   width: 180px;
   aspect-ratio: 3 / 4; /* 宽:高 = 3:4 */
-  border-radius: 16px;
+  border-radius: var(--radius-input);
   overflow: hidden;
-  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--shadow-toy-sm);
   cursor: pointer;
 }
 
@@ -156,11 +156,11 @@
   position: absolute;
   top: 8px;
   right: 8px;
-  background: rgba(26, 26, 44, 0.7);
+  background: rgba(93, 64, 55, 0.7);
   color: #fff;
   font-size: 12px;
   padding: 4px 8px;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
 }
 
 .previewOverlay {
@@ -182,7 +182,7 @@
 .previewImage {
   max-width: 100%;
   max-height: 80vh;
-  border-radius: 16px;
+  border-radius: var(--radius-input);
   box-shadow: 0 18px 42px rgba(0, 0, 0, 0.35);
   object-fit: contain;
 }
@@ -191,16 +191,16 @@
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
-  background: rgba(255, 255, 255, 0.85);
+  background: var(--color-cream);
   color: var(--color-text);
   border: none;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   width: 40px;
   height: 40px;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.2);
+  box-shadow: var(--shadow-toy);
   cursor: pointer;
   opacity: 0; /* 默认隐身 */
   pointer-events: none; /* 隐身时不拦截点击 */
@@ -219,13 +219,13 @@
   position: absolute;
   top: 8px;
   right: 8px;
-  background: rgba(255, 255, 255, 0.9);
+  background: var(--color-cream);
   color: var(--color-text);
   border: none;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   width: 32px;
   height: 32px;
-  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.2);
+  box-shadow: var(--shadow-toy);
   cursor: pointer;
 }
 
@@ -234,22 +234,22 @@
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  background: var(--color-primary);
+  background: var(--color-cream);
   color: #fff;
   border: none;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   padding: 8px 14px;
   font-size: 14px;
-  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.12);
+  box-shadow: var(--shadow-toy-sm);
   cursor: pointer;
 }
 
 .ragPanel {
   height: 100%;
   width: 420px;
-  background: #fff;
-  border-radius: 20px;
-  box-shadow: 0 18px 42px rgba(26, 26, 44, 0.12);
+  background: var(--color-cream);
+  border-radius: var(--radius-input);
+  box-shadow: var(--shadow-toy);
   display: flex;
   flex-direction: column;
   flex-shrink: 0;
@@ -266,7 +266,7 @@
 .ragTitle {
   font-size: 16px;
   font-weight: 700;
-  color: var(--color-text-strong);
+  color: var(--color-cocoa-deep);
 }
 
 .ragBody {
@@ -282,7 +282,7 @@
   width: 100%;
   min-height: 64px;
   resize: vertical;
-  border-radius: 12px;
+  border-radius: var(--radius-input);
   padding: 10px 12px;
   border: 1px solid rgba(0,0,0,0.08);
   outline: none;
@@ -301,7 +301,7 @@
 }
 
 .ragBtnPrimary {
-  background: var(--color-primary);
+  background: var(--color-cream);
   color: #fff;
 }
 
@@ -311,7 +311,7 @@
 }
 
 .ragHint {
-  color: var(--color-text-disabled, var(--color-text-muted));
+  color: var(--color-text-disabled, var(--color-cocoa-soft));
   opacity: 0.7; /* 置灰效果 */
   font-size: 12px;
 }
@@ -319,7 +319,7 @@
 .ragAnswer {
   margin-top: 6px;
   padding: 12px;
-  border-radius: 12px;
+  border-radius: var(--radius-input);
   background: rgba(246, 248, 250, 0.8);
   color: var(--color-text);
   line-height: 1.8;
@@ -329,7 +329,7 @@
 }
 
 .ragPlaceholder {
-  color: var(--color-text-muted);
+  color: var(--color-cocoa-soft);
 }
 
 /* 两栏布局：正文 + 问答面板 */

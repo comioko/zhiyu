@@ -1,0 +1,136 @@
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-family: inherit;
+  font-weight: 700;
+  cursor: pointer;
+  border: var(--stroke-base);
+  border-radius: var(--radius-button);
+  padding: 12px 24px;
+  font-size: 15px;
+  background: var(--color-cream);
+  color: var(--color-cocoa-deep);
+  box-shadow: var(--shadow-toy);
+  transition: transform 0.18s ease-out, box-shadow 0.18s ease-out,
+    background 0.18s ease-out;
+  user-select: none;
+  white-space: nowrap;
+}
+
+.button:hover:not(:disabled) {
+  transform: translate(-2px, -2px);
+  box-shadow: var(--shadow-toy-lg);
+}
+
+.button:active:not(:disabled) {
+  transform: translate(2px, 2px);
+  box-shadow: var(--shadow-toy-sm);
+  transition-duration: 0.08s;
+}
+
+.button:focus-visible {
+  outline: none;
+  box-shadow: var(--shadow-toy), var(--shadow-focus);
+}
+
+.button:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+  box-shadow: var(--shadow-toy-muted);
+  background: var(--color-milk);
+  color: var(--color-cocoa-soft);
+}
+
+/* ===== variants ===== */
+.primary {
+  background: var(--color-cocoa);
+  color: var(--color-cream);
+}
+
+.primary:hover:not(:disabled) {
+  background: var(--color-cocoa-deep);
+}
+
+.secondary {
+  background: var(--color-sky);
+  color: var(--color-cocoa-deep);
+}
+
+.secondary:hover:not(:disabled) {
+  background: var(--color-sky-deep);
+}
+
+.matcha {
+  background: var(--color-matcha);
+  color: var(--color-cocoa-deep);
+}
+
+.matcha:hover:not(:disabled) {
+  background: var(--color-matcha-deep);
+}
+
+.ghost {
+  background: transparent;
+  box-shadow: none;
+  border: var(--stroke-thin);
+}
+
+.ghost:hover:not(:disabled) {
+  background: var(--color-milk);
+  box-shadow: var(--shadow-toy-sm);
+}
+
+.danger {
+  background: var(--color-warning);
+  color: var(--color-cream);
+  border-color: var(--color-warning-deep);
+}
+
+.danger:hover:not(:disabled) {
+  background: var(--color-warning-deep);
+}
+
+/* ===== sizes ===== */
+.size-sm {
+  padding: 8px 16px;
+  font-size: 13px;
+  border-radius: 16px;
+}
+
+.size-md {
+  padding: 12px 24px;
+  font-size: 15px;
+}
+
+.size-lg {
+  padding: 16px 32px;
+  font-size: 18px;
+  border-radius: var(--radius-panel);
+}
+
+/* ===== full width ===== */
+.full {
+  width: 100%;
+}
+
+.loading {
+  cursor: wait;
+  pointer-events: none;
+}
+
+.spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid currentColor;
+  border-top-color: transparent;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}

@@ -1,0 +1,58 @@
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 10px;
+  border-radius: var(--radius-pill);
+  border: 2px solid var(--color-cocoa);
+  background: var(--color-cream);
+  color: var(--color-cocoa-deep);
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1.2;
+  white-space: nowrap;
+  font-family: inherit;
+}
+
+/* 形状 */
+.round {
+  border-radius: 50%;
+  min-width: 22px;
+  height: 22px;
+  padding: 0;
+  justify-content: center;
+}
+
+/* 色调 */
+.toneSky {
+  background: var(--color-sky);
+}
+.toneMatcha {
+  background: var(--color-matcha);
+}
+.tonePeach {
+  background: var(--color-peach);
+}
+.toneWarning {
+  background: var(--color-warning);
+  color: var(--color-cream);
+}
+.toneCocoa {
+  background: var(--color-cocoa);
+  color: var(--color-cream);
+}
+.toneOutline {
+  background: transparent;
+  color: var(--color-cocoa-deep);
+}
+
+/* 尺寸 */
+.sizeSm {
+  font-size: 10px;
+  padding: 2px 7px;
+}
+
+.sizeLg {
+  font-size: 13px;
+  padding: 4px 12px;
+}
