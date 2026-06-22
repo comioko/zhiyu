@@ -127,12 +127,11 @@ const LoginPage = () => {
         }}
       >
         <div className="text-center mb-7">
-          <div className="text-5xl mb-3">👋</div>
           <h1 className="text-2xl font-bold mb-1.5" style={{ color: "var(--color-cocoa-deep)" }}>
             欢迎回来
           </h1>
           <p className="text-sm" style={{ color: "var(--color-cocoa-soft)" }}>
-            登录后继续你的知识之旅 ✨
+            登录后继续你的知识之旅
           </p>
         </div>
 
@@ -146,7 +145,7 @@ const LoginPage = () => {
             type="text"
             autoComplete="username"
             iconLeft={<Smartphone size={16} strokeWidth={2.5} />}
-            helper="📬 验证码会发到你的手机或邮箱，无需密码"
+            helper="验证码会发到你的手机或邮箱，无需密码"
           />
 
           <div>
@@ -228,7 +227,7 @@ const LoginPage = () => {
             disabled={isDisabled}
             loading={submitting}
           >
-            {submitting ? "登录中..." : "🌸 登 录"}
+            {submitting ? "登录中..." : "登 录"}
           </Button>
 
           <div className="flex items-center gap-3 my-2">
@@ -253,7 +252,7 @@ const LoginPage = () => {
                 fontFamily: "inherit",
               }}
             >
-              <span>💬</span> 微信
+              微信
             </button>
             <button
               type="button"
@@ -268,7 +267,7 @@ const LoginPage = () => {
                 fontFamily: "inherit",
               }}
             >
-              <span>📱</span> 手机一键
+              手机一键
             </button>
           </div>
 
