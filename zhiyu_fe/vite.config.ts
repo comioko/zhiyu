@@ -8,8 +8,9 @@ export default defineConfig({
     port: 5173,
     proxy: {
       "/api": {
-        target: "http://localhost:8080",
-        changeOrigin: true
+        target: "https://referenced-connect-dos-registry.trycloudflare.com",
+        changeOrigin: true,
+        secure: true
       }
     }
   },

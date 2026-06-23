@@ -1,9 +1,9 @@
+/* ===== 字体：MiSans 中文（系统字体，无外链）+ Quicksand 英文 ===== */
+@import url("https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600;700&display=swap");
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-
-/* ===== 字体：MiSans 中文（系统字体，无外链）+ Quicksand 英文 ===== */
-@import url("https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600;700&display=swap");
 
 @font-face {
   font-family: "MiSans";
