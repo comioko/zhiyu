@@ -1,0 +1,52 @@
+# 可选轻量配置，绝不自动激活：--spring.profiles.active=prod,lite
+# 仍必须提供可用的 MySQL、Redis 和 JWT 密钥；不保证能在 512 MiB 主机运行。
+# AI 不注册；Kafka/Canal 不消费；无 Elasticsearch 时搜索不可用。
+# 关注镜像、搜索索引和异步计数没有替代实现，需要完整中间件时恢复 prod。
+# JVM 堆/元空间上限由启动脚本设置，不由此文件设置。
+spring:
+  config:
+    import: classpath:application-noai.yml
+  datasource:
+    hikari:
+      maximum-pool-size: ${DB_POOL_MAX_SIZE:3}
+      minimum-idle: ${DB_POOL_MIN_IDLE:1}
+  data:
+    redis:
+      lettuce:
+        pool:
+          max-active: ${REDIS_POOL_MAX_ACTIVE:4}
+          max-idle: ${REDIS_POOL_MAX_IDLE:2}
+          min-idle: ${REDIS_POOL_MIN_IDLE:0}
+  kafka:
+    listener:
+      auto-startup: false
+    producer:
+      properties:
+        # 无 broker 时避免业务线程等待默认的一分钟；不提供消息持久化替代。
+        max.block.ms: 1000
+        request.timeout.ms: 3000
+        delivery.timeout.ms: 6000
+
+server:
+  tomcat:
+    threads:
+      max: ${HTTP_MAX_THREADS:16}
+      min-spare: ${HTTP_MIN_SPARE_THREADS:2}
+
+redisson:
+  threads: ${REDISSON_THREADS:2}
+  netty-threads: ${REDISSON_NETTY_THREADS:2}
+  connection-pool-size: ${REDISSON_CONNECTION_POOL_SIZE:4}
+  connection-minimum-idle-size: ${REDISSON_CONNECTION_MINIMUM_IDLE_SIZE:1}
+  subscription-connection-pool-size: ${REDISSON_SUBSCRIPTION_CONNECTION_POOL_SIZE:2}
+  subscription-connection-minimum-idle-size: ${REDISSON_SUBSCRIPTION_CONNECTION_MINIMUM_IDLE_SIZE:1}
+
+management:
+  health:
+    elasticsearch:
+      enabled: false
+    mail:
+      enabled: false
+
+canal:
+  enabled: false

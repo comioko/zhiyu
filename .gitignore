@@ -19,3 +19,16 @@ Thumbs.db
 
 # Vite 临时文件
 *.timestamp-*.mjs
+
+# Build outputs and local secrets (the root repository also tracks both apps).
+**/target/
+**/node_modules/
+**/dist/
+**/.env
+**/.env.local
+**/.env.*.local
+**/secrets/
+*.log
+!zhiyu_be/src/main/resources/application-prod.yml
+!zhiyu_be/src/main/resources/application-noai.yml
+!zhiyu_be/src/main/resources/application-lite.yml

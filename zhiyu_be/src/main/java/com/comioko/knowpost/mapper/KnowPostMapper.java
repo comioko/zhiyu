@@ -30,6 +30,14 @@ public interface KnowPostMapper {
                                                                               @Param("limit") int limit,
                                                                               @Param("offset") int offset);
 
+    List<KnowPostFeedRow> listFollowingFeed(@Param("userId") long userId,
+                                            @Param("limit") int limit,
+                                            @Param("offset") int offset);
+
+    List<KnowPostFeedRow> listRecommended(@Param("userId") long userId,
+                                          @Param("limit") int limit,
+                                          @Param("offset") int offset);
+
     // 设置置顶
     int updateTop(@Param("id") Long id, @Param("creatorId") Long creatorId, @Param("isTop") Boolean isTop);
 

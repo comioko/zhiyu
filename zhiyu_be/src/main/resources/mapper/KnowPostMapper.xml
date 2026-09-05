@@ -132,6 +132,49 @@
         LIMIT #{limit} OFFSET #{offset}
     </select>
 
+    <!-- 关注流：只返回当前用户已关注创作者的公开内容。 -->
+    <select id="listFollowingFeed" resultType="com.comioko.knowpost.model.KnowPostFeedRow">
+        SELECT p.id, p.title, p.description, p.tags, p.img_urls AS imgUrls,
+               u.avatar AS authorAvatar, u.nickname AS authorNickname, u.tags_json AS authorTagJson,
+               p.publish_time AS publishTime, p.is_top AS isTop
+        FROM following f
+        JOIN know_posts p ON p.creator_id = f.to_user_id
+        JOIN users u ON u.id = p.creator_id
+        WHERE f.from_user_id = #{userId} AND f.rel_status = 1
+          AND p.status = 'published' AND p.visible = 'public'
+        ORDER BY p.publish_time DESC
+        LIMIT #{limit} OFFSET #{offset}
+    </select>
+
+    <!-- 推荐：叠加个人标签、阅读/收藏/点赞过的相似标签及关注作者，新内容略有加权。 -->
+    <select id="listRecommended" resultType="com.comioko.knowpost.model.KnowPostFeedRow">
+        SELECT p.id, p.title, p.description, p.tags, p.img_urls AS imgUrls,
+               u.avatar AS authorAvatar, u.nickname AS authorNickname, u.tags_json AS authorTagJson,
+               p.publish_time AS publishTime, p.is_top AS isTop,
+               (
+                 CASE WHEN JSON_OVERLAPS(COALESCE(p.tags, JSON_ARRAY()), COALESCE(me.tags_json, JSON_ARRAY())) THEN 4 ELSE 0 END +
+                 CASE WHEN EXISTS (
+                   SELECT 1 FROM user_post_activities a
+                   JOIN know_posts seen ON seen.id = a.post_id
+                   WHERE a.user_id = #{userId}
+                     AND (a.view_count > 0 OR a.liked = 1 OR a.faved = 1)
+                     AND JSON_OVERLAPS(COALESCE(p.tags, JSON_ARRAY()), COALESCE(seen.tags, JSON_ARRAY()))
+                 ) THEN 6 ELSE 0 END +
+                 CASE WHEN EXISTS (
+                   SELECT 1 FROM following f WHERE f.from_user_id = #{userId}
+                     AND f.to_user_id = p.creator_id AND f.rel_status = 1
+                 ) THEN 3 ELSE 0 END
+               ) AS recommendationScore
+        FROM know_posts p
+        JOIN users u ON u.id = p.creator_id
+        JOIN users me ON me.id = #{userId}
+        LEFT JOIN user_post_activities viewed ON viewed.user_id = #{userId} AND viewed.post_id = p.id
+        WHERE p.status = 'published' AND p.visible = 'public' AND p.creator_id != #{userId}
+          AND (viewed.last_viewed_at IS NULL OR viewed.last_viewed_at &lt; DATE_SUB(NOW(), INTERVAL 1 DAY))
+        ORDER BY recommendationScore DESC, p.publish_time DESC
+        LIMIT #{limit} OFFSET #{offset}
+    </select>
+
     <!-- 详情查询（含作者信息） -->
     <select id="findDetailById" parameterType="long" resultType="com.comioko.knowpost.model.KnowPostDetailRow">
         SELECT

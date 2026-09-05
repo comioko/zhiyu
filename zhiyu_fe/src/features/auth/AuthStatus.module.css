@@ -4,6 +4,8 @@
   gap: 12px;
 }
 
+.notificationLink { display: grid; place-items: center; width: 34px; height: 34px; border: var(--stroke-thin); border-radius: 50%; background: var(--color-sky); text-decoration: none; box-shadow: var(--shadow-toy-sm); }
+
 .logoutButton {
   padding: 8px 16px;
   border-radius: 999px;

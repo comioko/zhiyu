@@ -3,18 +3,26 @@ package com.comioko.llm.service.impl;
 import com.comioko.llm.service.KnowPostDescriptionService;
 import com.comioko.common.exception.BusinessException;
 import com.comioko.common.exception.ErrorCode;
-import lombok.RequiredArgsConstructor;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.deepseek.DeepSeekChatOptions;
-import org.springframework.stereotype.Service;
 
 import java.text.Normalizer;
 
-@Service
-@RequiredArgsConstructor
+/**
+ * 基于大模型的知文描述生成实现。
+ *
+ * 注意：本类不再使用 {@code @Service}，而是由 {@link com.comioko.llm.LlmConfig}
+ * 通过 {@code @Bean} + {@code @ConditionalOnBean(ChatClient.class)} 条件化注册，
+ * 避免在 {@code @Component}/{@code @Service} 上使用 {@code @ConditionalOnBean}
+ * 时条件评估不可靠导致 bean 缺失的问题。
+ */
 public class KnowPostDescriptionServiceImpl implements KnowPostDescriptionService {
 
     private final ChatClient chatClient;
+
+    public KnowPostDescriptionServiceImpl(ChatClient chatClient) {
+        this.chatClient = chatClient;
+    }
 
     /**
      * 基于正文生成不超过 50 字的中文描述。

@@ -5,9 +5,12 @@ import CourseCard from "@/components/cards/CourseCard";
 import LikeFavBar from "@/components/common/LikeFavBar";
 import { knowpostService } from "@/services/knowpostService";
 import AuthStatus from "@/features/auth/AuthStatus";
+import { useAuth } from "@/context/AuthContext";
 import styles from "./HomePage.module.css";
 
 const HomePage = () => {
+  const { user, tokens } = useAuth();
+  const [feedMode, setFeedMode] = useState<"discover" | "following" | "recommend">("discover");
   const [items, setItems] = useState<Array<{
     id: string;
     title: string;
@@ -32,13 +35,21 @@ const HomePage = () => {
 
   const loadFeed = useCallback(async (targetPage: number, append: boolean) => {
     if (fetchingRef.current) return;
+    if (feedMode !== "discover" && !user) {
+      setError("登录后即可查看关注流与为你推荐的内容");
+      return;
+    }
     fetchingRef.current = true;
     setLoading(true);
     if (!append) {
       setError(null);
     }
     try {
-      const resp = await knowpostService.feed(targetPage, 20);
+      const resp = feedMode === "following"
+        ? await knowpostService.following(targetPage, 20, tokens?.accessToken)
+        : feedMode === "recommend"
+          ? await knowpostService.recommendations(targetPage, 20, tokens?.accessToken)
+          : await knowpostService.feed(targetPage, 20);
       const nextItems = resp.items ?? [];
       setItems(prev => {
         if (!append) return nextItems;
@@ -60,9 +71,12 @@ const HomePage = () => {
       fetchingRef.current = false;
       setLoading(false);
     }
-  }, []);
+  }, [feedMode, tokens?.accessToken, user]);
 
   useEffect(() => {
+    setItems([]);
+    setPage(1);
+    setHasMore(true);
     void loadFeed(1, false);
   }, [loadFeed]);
 
@@ -91,6 +105,12 @@ const HomePage = () => {
       header={
         <MainHeader
           headline="知域 · 让思想有温度，让知识会发光"
+          subtitle={feedMode === "following" ? "来自你关注创作者的最新分享" : feedMode === "recommend" ? "结合你的标签、阅读和收藏偏好" : "发现值得学习的新知识"}
+          tabs={[
+            { id: "discover", label: "发现", active: feedMode === "discover", onSelect: () => setFeedMode("discover") },
+            { id: "following", label: "关注", active: feedMode === "following", onSelect: () => setFeedMode("following") },
+            { id: "recommend", label: "为你推荐", active: feedMode === "recommend", onSelect: () => setFeedMode("recommend") }
+          ]}
           rightSlot={<AuthStatus />}
         />
       }

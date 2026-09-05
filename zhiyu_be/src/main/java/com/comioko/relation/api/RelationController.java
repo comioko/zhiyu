@@ -28,13 +28,15 @@ public class RelationController {
     private final StringRedisTemplate redis;
     private final com.comioko.counter.service.UserCounterService userCounterService;
     private final com.comioko.relation.mapper.RelationMapper relationMapper;
+    private final com.comioko.community.service.NotificationService notificationService;
 
-    public RelationController(RelationService relationService, JwtService jwtService, StringRedisTemplate redis, com.comioko.counter.service.UserCounterService userCounterService, com.comioko.relation.mapper.RelationMapper relationMapper) {
+    public RelationController(RelationService relationService, JwtService jwtService, StringRedisTemplate redis, com.comioko.counter.service.UserCounterService userCounterService, com.comioko.relation.mapper.RelationMapper relationMapper, com.comioko.community.service.NotificationService notificationService) {
         this.relationService = relationService;
         this.jwtService = jwtService;
         this.redis = redis;
         this.userCounterService = userCounterService;
         this.relationMapper = relationMapper;
+        this.notificationService = notificationService;
     }
 
     /**
@@ -46,7 +48,9 @@ public class RelationController {
     @PostMapping("/follow")
     public boolean follow(@RequestParam("toUserId") long toUserId, @AuthenticationPrincipal Jwt jwt) {
         long uid = jwtService.extractUserId(jwt);
-        return relationService.follow(uid, toUserId);
+        boolean changed = relationService.follow(uid, toUserId);
+        if (changed) notificationService.notify(toUserId, uid, "follow", null, null, null);
+        return changed;
     }
 
     /**

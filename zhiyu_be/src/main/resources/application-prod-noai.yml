@@ -1,0 +1,5 @@
+# 兼容旧 profile 名称：--spring.profiles.active=prod,prod-noai
+# 新部署请使用 --spring.profiles.active=prod,noai。
+spring:
+  config:
+    import: classpath:application-noai.yml

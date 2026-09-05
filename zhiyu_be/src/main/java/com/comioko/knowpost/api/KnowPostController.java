@@ -130,6 +130,20 @@ public class KnowPostController {
         return feedService.getMyPublished(userId, page, size);
     }
 
+    @GetMapping("/following")
+    public FeedPageResponse following(@RequestParam(value = "page", defaultValue = "1") int page,
+                                      @RequestParam(value = "size", defaultValue = "20") int size,
+                                      @AuthenticationPrincipal Jwt jwt) {
+        return feedService.getFollowingFeed(jwtService.extractUserId(jwt), page, size);
+    }
+
+    @GetMapping("/recommendations")
+    public FeedPageResponse recommendations(@RequestParam(value = "page", defaultValue = "1") int page,
+                                            @RequestParam(value = "size", defaultValue = "20") int size,
+                                            @AuthenticationPrincipal Jwt jwt) {
+        return feedService.getRecommendedFeed(jwtService.extractUserId(jwt), page, size);
+    }
+
     /**
      * 知文详情（公开：published+public；非公开需作者本人）。
      */

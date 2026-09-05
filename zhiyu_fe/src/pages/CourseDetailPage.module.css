@@ -278,6 +278,14 @@
   min-height: 0; /* 允许内部滚动区域正确缩放 */
 }
 
+.assistantBox { padding-bottom: 12px; border-bottom: var(--stroke-thin); display: flex; flex-direction: column; gap: 9px; }
+.assistantTitle { font-weight: 800; color: var(--color-cocoa-deep); }
+.assistantControls, .sourceList { display: flex; flex-wrap: wrap; gap: 7px; }
+.assistantChip, .source { border: var(--stroke-thin); background: var(--color-milk); color: var(--color-cocoa-deep); border-radius: var(--radius-pill); padding: 5px 9px; cursor: pointer; font: inherit; font-size: 12px; }
+.assistantChipActive { background: var(--color-sky); }
+.assistantResult { padding: 10px; background: rgba(184, 216, 232, .22); border-radius: var(--radius-input); max-height: 380px; overflow: auto; }
+.assistantError { color: var(--color-danger); font-size: 13px; }
+
 .ragTextarea {
   width: 100%;
   min-height: 64px;
@@ -344,6 +352,21 @@
   flex: 1;
   min-width: 0;
 }
+
+.comments { display: flex; flex-direction: column; gap: 16px; }
+.commentComposer { display: flex; flex-direction: column; align-items: flex-end; gap: 10px; }
+.commentComposer textarea { width: 100%; min-height: 90px; padding: 12px; border: var(--stroke-thin); border-radius: var(--radius-input); background: var(--color-milk); font: inherit; }
+.replying { align-self: stretch; display: flex; justify-content: space-between; color: var(--color-cocoa-soft); font-size: 13px; }
+.replying button, .commentContent button { border: 0; background: none; color: var(--color-cocoa-soft); cursor: pointer; font: inherit; font-size: 12px; }
+.commentList { display: flex; flex-direction: column; gap: 12px; }
+.comment { display: flex; gap: 10px; padding: 14px; border: var(--stroke-thin); border-radius: var(--radius-input); background: var(--color-milk); }
+.commentReply { margin-left: 38px; background: rgba(184, 216, 232, .18); }
+.commentAvatar { width: 34px; height: 34px; flex: 0 0 34px; display: grid; place-items: center; border-radius: 50%; overflow: hidden; background: var(--color-peach); font-weight: 800; }
+.commentAvatar img { width: 100%; height: 100%; object-fit: cover; }
+.commentContent { min-width: 0; flex: 1; }
+.commentContent time { margin-left: 10px; color: var(--color-text-muted); font-size: 12px; }
+.commentContent p { white-space: pre-wrap; margin: 7px 0; }
+.replyLabel { color: var(--color-cocoa-soft); font-size: 12px; }
 
 @media (max-width: 980px) {
   .contentRow {

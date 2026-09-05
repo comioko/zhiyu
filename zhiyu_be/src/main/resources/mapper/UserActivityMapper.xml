@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.comioko.community.mapper.UserActivityMapper">
+    <insert id="recordView">
+        INSERT INTO user_post_activities (user_id, post_id, view_count, last_viewed_at)
+        VALUES (#{userId}, #{postId}, 1, NOW())
+        ON DUPLICATE KEY UPDATE view_count = view_count + 1, last_viewed_at = NOW()
+    </insert>
+    <insert id="setLiked">
+        INSERT INTO user_post_activities (user_id, post_id, liked)
+        VALUES (#{userId}, #{postId}, #{active})
+        ON DUPLICATE KEY UPDATE liked = #{active}
+    </insert>
+    <insert id="setFaved">
+        INSERT INTO user_post_activities (user_id, post_id, faved)
+        VALUES (#{userId}, #{postId}, #{active})
+        ON DUPLICATE KEY UPDATE faved = #{active}
+    </insert>
+</mapper>

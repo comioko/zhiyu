@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.comioko.community.mapper.CommentMapper">
+    <insert id="insert">
+        INSERT INTO post_comments (id, post_id, author_id, parent_id, reply_to_user_id, content)
+        VALUES (#{id}, #{postId}, #{authorId}, #{parentId}, #{replyToUserId}, #{content})
+    </insert>
+    <select id="findById" resultType="com.comioko.community.model.CommentRow">
+        SELECT c.id, c.post_id AS postId, c.author_id AS authorId, c.parent_id AS parentId,
+               c.reply_to_user_id AS replyToUserId, c.content, c.created_at AS createdAt,
+               u.nickname AS authorNickname, u.avatar AS authorAvatar
+        FROM post_comments c JOIN users u ON u.id = c.author_id
+        WHERE c.id = #{id} AND c.status = 'active'
+    </select>
+    <select id="listByPostId" resultType="com.comioko.community.model.CommentRow">
+        SELECT c.id, c.post_id AS postId, c.author_id AS authorId, c.parent_id AS parentId,
+               c.reply_to_user_id AS replyToUserId, c.content, c.created_at AS createdAt,
+               u.nickname AS authorNickname, u.avatar AS authorAvatar
+        FROM post_comments c JOIN users u ON u.id = c.author_id
+        WHERE c.post_id = #{postId} AND c.status = 'active'
+        ORDER BY COALESCE(c.parent_id, c.id), c.created_at ASC
+        LIMIT #{limit} OFFSET #{offset}
+    </select>
+</mapper>

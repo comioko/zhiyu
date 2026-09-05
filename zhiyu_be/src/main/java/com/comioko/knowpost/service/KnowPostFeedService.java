@@ -9,4 +9,8 @@ public interface KnowPostFeedService {
     FeedPageResponse getPublicFeed(int page, int size, Long currentUserIdNullable);
 
     FeedPageResponse getMyPublished(long userId, int page, int size);
+
+    FeedPageResponse getFollowingFeed(long userId, int page, int size);
+
+    FeedPageResponse getRecommendedFeed(long userId, int page, int size);
 }

@@ -234,10 +234,66 @@
             <groupId>org.springframework.ai</groupId>
             <artifactId>spring-ai-starter-model-deepseek</artifactId>
         </dependency>
+
+        <!-- Flyway：数据库版本化迁移 -->
+        <dependency>
+            <groupId>org.flywaydb</groupId>
+            <artifactId>flyway-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.flywaydb</groupId>
+            <artifactId>flyway-mysql</artifactId>
+        </dependency>
     </dependencies>
 
     <build>
+        <!-- Runtime secrets belong on the server, never in a distributable jar. -->
+        <resources combine.self="override">
+            <resource>
+                <directory>src/main/resources</directory>
+                <filtering>false</filtering>
+                <excludes>
+                    <exclude>**/application.yml</exclude>
+                    <exclude>**/application.yaml</exclude>
+                    <exclude>**/application.properties</exclude>
+                    <exclude>**/application-dev.*</exclude>
+                    <exclude>**/application-test.*</exclude>
+                    <exclude>**/application-local.*</exclude>
+                    <exclude>**/keys/**</exclude>
+                    <exclude>**/secrets/**</exclude>
+                    <exclude>**/.env*</exclude>
+                    <exclude>**/*.pem</exclude>
+                    <exclude>**/*.key</exclude>
+                    <exclude>**/*.p12</exclude>
+                    <exclude>**/*.pfx</exclude>
+                    <exclude>**/*.jks</exclude>
+                </excludes>
+            </resource>
+        </resources>
         <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <configuration>
+                    <!-- Also protect incremental builds with stale target/classes resources. -->
+                    <excludes>
+                        <exclude>**/application.yml</exclude>
+                        <exclude>**/application.yaml</exclude>
+                        <exclude>**/application.properties</exclude>
+                        <exclude>**/application-dev.*</exclude>
+                        <exclude>**/application-test.*</exclude>
+                        <exclude>**/application-local.*</exclude>
+                        <exclude>**/keys/**</exclude>
+                        <exclude>**/secrets/**</exclude>
+                        <exclude>**/.env*</exclude>
+                        <exclude>**/*.pem</exclude>
+                        <exclude>**/*.key</exclude>
+                        <exclude>**/*.p12</exclude>
+                        <exclude>**/*.pfx</exclude>
+                        <exclude>**/*.jks</exclude>
+                    </excludes>
+                </configuration>
+            </plugin>
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>

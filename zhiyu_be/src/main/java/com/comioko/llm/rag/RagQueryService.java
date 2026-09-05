@@ -1,24 +1,23 @@
 package com.comioko.llm.rag;
 
-import lombok.RequiredArgsConstructor;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.deepseek.DeepSeekChatOptions;
 import org.springframework.ai.document.Document;
 import org.springframework.ai.vectorstore.SearchRequest;
 import org.springframework.ai.vectorstore.VectorStore;
-import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 
 import java.util.ArrayList;
 import java.util.List;
-
 /**
  * RAG 问答查询服务：
  * - 在问答前保障索引，检索相关上下文并构造提示词
  * - 通过 ChatClient 以流式（SSE）方式返回模型输出
+ *
+ * 本类不再使用 {@code @Service} + {@code @ConditionalOnBean}，而是由
+ * {@link com.comioko.llm.rag.RagConfig} 通过 {@code @Bean} 条件化注册，
+ * 避免 {@code @ConditionalOnBean} 在组件扫描阶段条件评估不可靠的问题。
  */
-@Service
-@RequiredArgsConstructor
 public class RagQueryService {
     // 向量检索接口（Elasticsearch 向量库封装）
     private final VectorStore vectorStore;
@@ -26,6 +25,12 @@ public class RagQueryService {
     private final ChatClient chatClient;
     // 索引服务：确保帖子在问答前已建立/更新索引
     private final RagIndexService indexService;
+
+    public RagQueryService(VectorStore vectorStore, ChatClient chatClient, RagIndexService indexService) {
+        this.vectorStore = vectorStore;
+        this.chatClient = chatClient;
+        this.indexService = indexService;
+    }
 
     /**
      * 使用 WebFlux 返回回答内容的流。

@@ -5,12 +5,11 @@ import { fileURLToPath, URL } from "node:url";
 export default defineConfig({
   plugins: [react()],
   server: {
-    port: 5173,
+    port: 5173, allowedHosts: ['moe.hair', 'api.moe.hair'],
     proxy: {
       "/api": {
-        target: "https://referenced-connect-dos-registry.trycloudflare.com",
-        changeOrigin: true,
-        secure: true
+        target: "http://localhost:8080",
+        changeOrigin: true
       }
     }
   },

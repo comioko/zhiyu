@@ -437,6 +437,28 @@ public class KnowPostFeedServiceImpl implements KnowPostFeedService {
         return resp;
     }
 
+    @Override
+    public FeedPageResponse getFollowingFeed(long userId, int page, int size) {
+        return getPersonalizedPage(userId, page, size, true);
+    }
+
+    @Override
+    public FeedPageResponse getRecommendedFeed(long userId, int page, int size) {
+        return getPersonalizedPage(userId, page, size, false);
+    }
+
+    private FeedPageResponse getPersonalizedPage(long userId, int page, int size, boolean following) {
+        int safeSize = Math.min(Math.max(size, 1), 50);
+        int safePage = Math.max(page, 1);
+        int offset = (safePage - 1) * safeSize;
+        List<KnowPostFeedRow> rows = following
+                ? mapper.listFollowingFeed(userId, safeSize + 1, offset)
+                : mapper.listRecommended(userId, safeSize + 1, offset);
+        boolean hasMore = rows.size() > safeSize;
+        if (hasMore) rows = rows.subList(0, safeSize);
+        return new FeedPageResponse(mapRowsToItems(rows, userId, false), safePage, safeSize, hasMore);
+    }
+
     /**
      * 解析 JSON 数组字符串为 List<String>。
      * @param json JSON 数组字符串

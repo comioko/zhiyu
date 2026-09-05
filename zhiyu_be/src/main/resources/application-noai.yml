@@ -1,0 +1,23 @@
+# 手动启用：--spring.profiles.active=prod,noai
+# 保留数据库、Redis、搜索等生产配置，仅关闭全部模型与向量库自动装配。
+# 即使服务器仍配置了 QWEN_API_KEY/DEEPSEEK_API_KEY，也不会创建 AI 服务。
+spring:
+  ai:
+    model:
+      chat: none
+      embedding: none
+      image: none
+      moderation: none
+      audio:
+        speech: none
+        transcription: none
+    chat:
+      client:
+        enabled: false
+    openai:
+      api-key: ""
+    deepseek:
+      api-key: ""
+  autoconfigure:
+    exclude:
+      - org.springframework.ai.vectorstore.elasticsearch.autoconfigure.ElasticsearchVectorStoreAutoConfiguration

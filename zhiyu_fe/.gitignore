@@ -38,6 +38,10 @@ coverage/
 .pages/
 .wrangler/
 
+# 后端 API 文档（不应出现在前端仓库）
+docs/
+profile-api.md
+
 # lockfile（注意：三选一提交，其他忽略）
 # 如果你用 npm，请删除下面两行；如果用 pnpm/yarn，则保留对应一行并提交那个锁文件
 # yarn.lock

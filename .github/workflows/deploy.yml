@@ -1,0 +1,132 @@
+name: Build and deploy Zhiyu
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# Never interrupt a release after it has begun changing the running service.
+concurrency:
+  group: zhiyu-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: ci-only
+          MYSQL_DATABASE: zhiguang
+        ports: ["3306:3306"]
+        options: >-
+          --health-cmd="mysqladmin ping -h 127.0.0.1 -pci-only"
+          --health-interval=10s --health-timeout=5s --health-retries=12
+      redis:
+        image: redis:7-alpine
+        ports: ["6379:6379"]
+        options: >-
+          --health-cmd="redis-cli ping"
+          --health-interval=5s --health-timeout=3s --health-retries=12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: zhiyu_fe/package-lock.json
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: maven
+      - name: Build frontend
+        working-directory: zhiyu_fe
+        env:
+          VITE_API_BASE_URL: ''
+        run: |
+          npm ci
+          npm run build
+      - name: Build and verify backend
+        working-directory: zhiyu_be
+        run: mvn -B -ntp clean verify
+      - name: Check application startup and APIs
+        run: bash deploy/ci-smoke.sh
+      - name: Package release
+        env:
+          RELEASE_SHA: ${{ github.sha }}
+        run: |
+          mkdir -p release/frontend release/backend
+          cp -a zhiyu_fe/dist/. release/frontend/
+          cp zhiyu_be/target/zhiyu-1.0-SNAPSHOT.jar release/backend/app.jar
+          printf '%s\n' "$RELEASE_SHA" > release/REVISION
+          tar -czf release.tar.gz -C release .
+          sha256sum release.tar.gz > release.tar.gz.sha256
+      - uses: actions/upload-artifact@v4
+        with:
+          name: release
+          path: |
+            release.tar.gz
+            release.tar.gz.sha256
+          retention-days: 7
+
+  deploy:
+    needs: build
+    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    environment:
+      name: production
+      url: http://113.20.8.115
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: release
+      - name: Configure SSH
+        env:
+          DEPLOY_KEY: ${{ secrets.SERVER_SSH_KEY }}
+          KNOWN_HOSTS: ${{ secrets.SERVER_KNOWN_HOSTS }}
+        run: |
+          umask 077
+          mkdir -p ~/.ssh
+          printf '%s\n' "$DEPLOY_KEY" > ~/.ssh/id_ed25519
+          printf '%s\n' "$KNOWN_HOSTS" > ~/.ssh/known_hosts
+          test -s ~/.ssh/id_ed25519
+          test -s ~/.ssh/known_hosts
+      - name: Upload and activate release
+        env:
+          SERVER_HOST: ${{ secrets.SERVER_HOST }}
+          SERVER_USER: ${{ secrets.SERVER_USER }}
+          SERVER_PORT: ${{ secrets.SERVER_PORT }}
+          RELEASE_ID: ${{ github.sha }}-${{ github.run_id }}-${{ github.run_attempt }}
+          DEPLOY_COMPONENTS: ${{ vars.DEPLOY_COMPONENTS || 'all' }}
+        run: |
+          set -euo pipefail
+          sha256sum -c release.tar.gz.sha256
+          ssh_options=(-o BatchMode=yes -o StrictHostKeyChecking=yes -o ConnectTimeout=15 -o ServerAliveInterval=15 -o ServerAliveCountMax=4 -p "$SERVER_PORT")
+          target="$SERVER_USER@$SERVER_HOST"
+          ssh "${ssh_options[@]}" "$target" "mkdir -p /srv/zhiyu/incoming/$RELEASE_ID"
+          scp -q -P "$SERVER_PORT" -o BatchMode=yes -o StrictHostKeyChecking=yes release.tar.gz release.tar.gz.sha256 "$target:/srv/zhiyu/incoming/$RELEASE_ID/"
+          [[ "$DEPLOY_COMPONENTS" == all || "$DEPLOY_COMPONENTS" == frontend ]]
+          ssh "${ssh_options[@]}" "$target" "bash -s -- '$RELEASE_ID' '$DEPLOY_COMPONENTS'" < deploy/activate.sh
+      - name: Verify public endpoints
+        env:
+          SERVER_HOST: ${{ secrets.SERVER_HOST }}
+          DEPLOY_COMPONENTS: ${{ vars.DEPLOY_COMPONENTS || 'all' }}
+        run: |
+          curl --fail --retry 3 --max-time 30 "http://$SERVER_HOST/" -o /dev/null
+          if [[ "$DEPLOY_COMPONENTS" == all ]]; then
+            curl --fail --retry 3 --max-time 30 "http://$SERVER_HOST/healthz"
+            curl --fail --retry 3 --max-time 30 "http://$SERVER_HOST/api/v1/knowposts/feed?page=1&size=1" -o /dev/null
+          fi
+      - name: Remove SSH key
+        if: always()
+        run: rm -f ~/.ssh/id_ed25519

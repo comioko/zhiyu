@@ -12,6 +12,7 @@ import type {
   CounterResponse,
   VisibleScope
 } from "@/types/knowpost";
+import type { LearningAssistantResult, LearningAssistantType } from "@/types/community";
 
 const KNOWPOST_PREFIX = "/api/v1/knowposts";
 const STORAGE_PREFIX = "/api/v1/storage";
@@ -89,6 +90,12 @@ export const knowpostService = {
     })
   ,
 
+  following: (page = 1, size = 20, accessToken?: string) =>
+    apiFetch<FeedResponse>(`${KNOWPOST_PREFIX}/following?page=${page}&size=${size}`, { accessToken }),
+
+  recommendations: (page = 1, size = 20, accessToken?: string) =>
+    apiFetch<FeedResponse>(`${KNOWPOST_PREFIX}/recommendations?page=${page}&size=${size}`, { accessToken }),
+
   // 获取知文详情（公开内容无需鉴权；非公开需要作者凭证）
   detail: (id: string, accessToken?: string) =>
     apiFetch<KnowpostDetailResponse>(`${KNOWPOST_PREFIX}/detail/${id}`, {
@@ -104,6 +111,11 @@ export const knowpostService = {
       accessToken
     })
   ,
+
+  learningAssistant: (id: string, type: LearningAssistantType, accessToken?: string) =>
+    apiFetch<LearningAssistantResult>(`${KNOWPOST_PREFIX}/${id}/learning-assistant`, {
+      method: "POST", body: { type }, accessToken
+    }),
 
   // 点赞/取消点赞（需鉴权）
   like: (entityId: string, accessToken: string, entityType: string = "knowpost") =>

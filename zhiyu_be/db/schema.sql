@@ -1,4 +1,11 @@
 -- MySQL 8.0 schema for ZhiGuang authentication service
+--
+-- 注意：此脚本与 src/main/resources/db/migration/V1__init_schema.sql 内容一致。
+-- 生产环境由 Flyway 在 Spring Boot 启动时自动执行迁移（V1__init_schema.sql）。
+-- 本文件保留用于本地 docker init / 新人初始化数据库。
+-- 修改 schema 时：先改 db/schema.sql，再同步到 V1__init_schema.sql；新增结构用 V2__xxx.sql。
+
+
 
 CREATE TABLE IF NOT EXISTS users (
     id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
@@ -107,4 +114,52 @@ CREATE TABLE IF NOT EXISTS follower (
     UNIQUE KEY uk_to_from (to_user_id, from_user_id),
     KEY idx_to_created (to_user_id, created_at, from_user_id, rel_status),
     KEY idx_from (from_user_id, to_user_id, rel_status)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- 社区互动、通知与个性化推荐（与 Flyway V2 保持一致）
+CREATE TABLE IF NOT EXISTS post_comments (
+    id BIGINT UNSIGNED NOT NULL,
+    post_id BIGINT UNSIGNED NOT NULL,
+    author_id BIGINT UNSIGNED NOT NULL,
+    parent_id BIGINT UNSIGNED NULL,
+    reply_to_user_id BIGINT UNSIGNED NULL,
+    content VARCHAR(1000) NOT NULL,
+    status VARCHAR(16) NOT NULL DEFAULT 'active',
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY (id),
+    KEY ix_comments_post_created (post_id, created_at),
+    KEY ix_comments_parent_created (parent_id, created_at),
+    CONSTRAINT fk_comments_post FOREIGN KEY (post_id) REFERENCES know_posts(id),
+    CONSTRAINT fk_comments_author FOREIGN KEY (author_id) REFERENCES users(id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS user_post_activities (
+    user_id BIGINT UNSIGNED NOT NULL,
+    post_id BIGINT UNSIGNED NOT NULL,
+    view_count INT UNSIGNED NOT NULL DEFAULT 0,
+    liked TINYINT(1) NOT NULL DEFAULT 0,
+    faved TINYINT(1) NOT NULL DEFAULT 0,
+    last_viewed_at TIMESTAMP NULL DEFAULT NULL,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY (user_id, post_id),
+    KEY ix_activities_user_updated (user_id, updated_at),
+    CONSTRAINT fk_activities_post FOREIGN KEY (post_id) REFERENCES know_posts(id),
+    CONSTRAINT fk_activities_user FOREIGN KEY (user_id) REFERENCES users(id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS notifications (
+    id BIGINT UNSIGNED NOT NULL,
+    recipient_id BIGINT UNSIGNED NOT NULL,
+    actor_id BIGINT UNSIGNED NOT NULL,
+    type VARCHAR(32) NOT NULL,
+    post_id BIGINT UNSIGNED NULL,
+    comment_id BIGINT UNSIGNED NULL,
+    content VARCHAR(1000) NULL,
+    is_read TINYINT(1) NOT NULL DEFAULT 0,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (id),
+    KEY ix_notifications_recipient_read_created (recipient_id, is_read, created_at),
+    CONSTRAINT fk_notifications_recipient FOREIGN KEY (recipient_id) REFERENCES users(id),
+    CONSTRAINT fk_notifications_actor FOREIGN KEY (actor_id) REFERENCES users(id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

@@ -90,6 +90,10 @@
         WHERE id = #{id}
     </select>
 
+    <select id="findByNickname" parameterType="string" resultMap="UserResultMap">
+        SELECT * FROM users WHERE nickname = #{nickname} LIMIT 1
+    </select>
+
     <update id="updatePassword">
         UPDATE users
         SET password_hash = #{passwordHash},

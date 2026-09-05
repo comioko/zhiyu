@@ -14,6 +14,8 @@ import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import LikeFavBar from "@/components/common/LikeFavBar";
 import FollowButton from "@/components/common/FollowButton";
+import { communityService } from "@/services/communityService";
+import type { Comment, LearningAssistantResult, LearningAssistantType } from "@/types/community";
 
 const CourseDetailPage = () => {
   const { id } = useParams<{ id: string }>();
@@ -40,6 +42,14 @@ const CourseDetailPage = () => {
   const ragESRef = useRef<EventSource | null>(null);
   const [ragTopK, setRagTopK] = useState<number>(5);
   const [ragMaxTokens, setRagMaxTokens] = useState<number>(1024);
+  const [comments, setComments] = useState<Comment[]>([]);
+  const [commentText, setCommentText] = useState("");
+  const [replyTo, setReplyTo] = useState<Comment | null>(null);
+  const [commentSubmitting, setCommentSubmitting] = useState(false);
+  const [assistantType, setAssistantType] = useState<LearningAssistantType>("outline");
+  const [assistantResult, setAssistantResult] = useState<LearningAssistantResult | null>(null);
+  const [assistantLoading, setAssistantLoading] = useState(false);
+  const [assistantError, setAssistantError] = useState<string | null>(null);
   // 从头像 URL 推断作者 ID（示例：.../avatars/3-xxxx.jpg → 3）
   const parseAvatarUserId = (url?: string): number | undefined => {
     if (!url) return undefined;
@@ -85,6 +95,11 @@ const CourseDetailPage = () => {
     run();
     return () => { cancelled = true; };
   }, [id, tokens?.accessToken]);
+
+  useEffect(() => {
+    if (!id) return;
+    communityService.comments(id).then(setComments).catch(() => setComments([]));
+  }, [id]);
 
   // 计算一行可展示的图片数量
   useEffect(() => {
@@ -182,6 +197,25 @@ const CourseDetailPage = () => {
     setRagLoading(false);
   };
 
+  const createComment = async () => {
+    if (!id || !commentText.trim()) return;
+    if (!tokens?.accessToken) { navigate("/login", { state: { from: `/post/${id}` } }); return; }
+    setCommentSubmitting(true);
+    try {
+      const created = await communityService.createComment(id, commentText.trim(), replyTo?.id, tokens.accessToken);
+      setComments(prev => [...prev, created]); setCommentText(""); setReplyTo(null);
+    } finally { setCommentSubmitting(false); }
+  };
+
+  const generateLearningAsset = async () => {
+    if (!id) return;
+    if (!tokens?.accessToken) { navigate("/login", { state: { from: `/post/${id}` } }); return; }
+    setAssistantLoading(true); setAssistantError(null);
+    try { setAssistantResult(await knowpostService.learningAssistant(id, assistantType, tokens.accessToken)); }
+    catch (err) { setAssistantError(err instanceof Error ? err.message : "生成失败，请稍后再试"); }
+    finally { setAssistantLoading(false); }
+  };
+
   useEffect(() => {
     return () => {
       // 页面卸载时关闭 SSE
@@ -261,7 +295,7 @@ const CourseDetailPage = () => {
 
         <div className={styles.contentRow}>
           <div className={styles.contentMain}>
-            <div className={`${styles.body} ${styles.markdown}`}>
+            <div id="content-top" className={`${styles.body} ${styles.markdown}`}>
               {contentText ? (
                 <ReactMarkdown
                   remarkPlugins={[remarkGfm]}
@@ -287,6 +321,24 @@ const CourseDetailPage = () => {
 
           <aside className={styles.ragPanel}>
             <div className={styles.ragBody}>
+              <div className={styles.assistantBox}>
+                <div className={styles.assistantTitle}>AI 学习助手</div>
+                <div className={styles.assistantControls}>
+                  {(["outline", "cards", "quiz", "plan"] as LearningAssistantType[]).map(type => (
+                    <button key={type} type="button" className={`${styles.assistantChip} ${assistantType === type ? styles.assistantChipActive : ""}`} onClick={() => setAssistantType(type)}>
+                      {{ outline: "大纲", cards: "知识卡", quiz: "复习题", plan: "学习计划" }[type]}
+                    </button>
+                  ))}
+                  <button type="button" className={`${styles.ragBtn} ${styles.ragBtnPrimary}`} onClick={generateLearningAsset} disabled={assistantLoading}>
+                    {assistantLoading ? "生成中…" : "生成"}
+                  </button>
+                </div>
+                {assistantError ? <div className={styles.assistantError}>{assistantError}</div> : null}
+                {assistantResult ? <div className={styles.assistantResult}>
+                  <div className={styles.markdown}><ReactMarkdown remarkPlugins={[remarkGfm]}>{assistantResult.content}</ReactMarkdown></div>
+                  <div className={styles.sourceList}>{assistantResult.sources.map(source => <button type="button" key={source.id} className={styles.source} title={source.excerpt} onClick={() => document.getElementById(source.anchorId)?.scrollIntoView({ behavior: "smooth", block: "start" })}>{source.id} · {source.label}</button>)}</div>
+                </div> : null}
+              </div>
               <textarea
                 className={styles.ragTextarea}
                 placeholder="围绕本知文提问，例如：这篇知文的核心观点是什么？"
@@ -338,6 +390,22 @@ const CourseDetailPage = () => {
             </div>
           </aside>
         </div>
+
+        <section className={styles.comments}>
+          <SectionHeader title={`评论讨论 · ${comments.length}`} subtitle="和同学一起把知识讲透" />
+          <div className={styles.commentComposer}>
+            {replyTo ? <div className={styles.replying}>正在回复 @{replyTo.authorNickname}<button type="button" onClick={() => setReplyTo(null)}>取消</button></div> : null}
+            <textarea value={commentText} onChange={e => setCommentText(e.target.value)} maxLength={1000} placeholder="写下你的想法；用 @昵称 提及同学" />
+            <button type="button" className="ghost-button" disabled={commentSubmitting || !commentText.trim()} onClick={createComment}>{commentSubmitting ? "发送中…" : "发布评论"}</button>
+          </div>
+          <div className={styles.commentList}>
+            {comments.map(comment => <article key={comment.id} className={`${styles.comment} ${comment.parentId ? styles.commentReply : ""}`}>
+              <div className={styles.commentAvatar}>{comment.authorAvatar ? <img src={comment.authorAvatar} alt="" /> : comment.authorNickname.charAt(0)}</div>
+              <div className={styles.commentContent}><div><b>{comment.authorNickname}</b>{comment.parentId ? <span className={styles.replyLabel}> 回复</span> : null}<time>{new Date(comment.createdAt).toLocaleString("zh-CN")}</time></div><p>{comment.content}</p><button type="button" onClick={() => { setReplyTo(comment); setCommentText(""); }}>回复</button></div>
+            </article>)}
+            {!comments.length ? <div className={styles.ragPlaceholder}>成为第一个参与讨论的人吧。</div> : null}
+          </div>
+        </section>
 
         {previewOpen && detail?.images?.length ? (
           <div className={styles.previewOverlay} onClick={() => setPreviewOpen(false)}>

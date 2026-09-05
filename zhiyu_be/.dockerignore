@@ -1,0 +1,30 @@
+target/
+!.mvn/wrapper/maven-wrapper.jar
+.git/
+.gitignore
+.idea/
+.vscode/
+*.iml
+*.iws
+*.ipr
+.DS_Store
+README.md
+docs/
+db/schema.sql
+deploy/
+.github/
+.claude/
+
+# 密钥不进镜像（用 secrets / 环境变量注入）
+src/main/resources/keys/
+*.pem
+
+# Keep local runtime credentials out of Docker build contexts too.
+src/main/resources/application.yml
+src/main/resources/application.yaml
+src/main/resources/application-dev.*
+src/main/resources/application-local.*
+src/main/resources/application-test.*
+.env
+.env.*.local
+secrets/

@@ -6,12 +6,10 @@ import co.elastic.clients.elasticsearch.core.search.Hit;
 import com.comioko.knowpost.mapper.KnowPostMapper;
 import com.comioko.knowpost.model.KnowPostDetailRow;
 import com.comioko.config.EsProperties;
-import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.ai.document.Document;
 import org.springframework.ai.vectorstore.VectorStore;
-import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestTemplate;
 
@@ -22,9 +20,14 @@ import java.util.*;
  * - 将公开且已发布的知文切片并写入向量库
  * - 通过指纹（SHA256/ETag）判断是否需要重建，保证幂等
  * - 采用 delete-by-query 清理旧切片，再批量 upsert 新切片
+ *
+ * 注意：当 application-prod-noai.yml 排除 AI 自动装配时，VectorStore bean 缺失，
+ * 本 service 也随之不创建（RAG 索引功能不可用，但不影响其他模块）。
+ *
+ * 本类不再使用 {@code @Service} + {@code @ConditionalOnBean}，而是由
+ * {@link com.comioko.llm.rag.RagConfig} 通过 {@code @Bean} 条件化注册，
+ * 避免 {@code @ConditionalOnBean} 在组件扫描阶段条件评估不可靠的问题。
  */
-@Service
-@RequiredArgsConstructor
 public class RagIndexService {
     private static final Logger log = LoggerFactory.getLogger(RagIndexService.class);
     // 向量库封装（Elasticsearch VectorStore），负责写入/检索向量
@@ -37,6 +40,16 @@ public class RagIndexService {
     private final ElasticsearchClient es;
     // ES 相关配置（索引名等）
     private final EsProperties esProps;
+
+    public RagIndexService(VectorStore vectorStore,
+                           KnowPostMapper knowPostMapper,
+                           ElasticsearchClient es,
+                           EsProperties esProps) {
+        this.vectorStore = vectorStore;
+        this.knowPostMapper = knowPostMapper;
+        this.es = es;
+        this.esProps = esProps;
+    }
 
     public void ensureIndexed(long postId) {
         // 当前策略：在问答前直接尝试重建（指纹未变化时会跳过）
