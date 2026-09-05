@@ -299,6 +299,9 @@
                 <artifactId>spring-boot-maven-plugin</artifactId>
                 <configuration>
                     <mainClass>com.comioko.ZhiYuApplication</mainClass>
+                    <!-- Local spring-boot:run reads developer resources directly;
+                         repackage still excludes credentials from release jars. -->
+                    <addResources>true</addResources>
                 </configuration>
             </plugin>
         </plugins>
