@@ -16,7 +16,7 @@ install -d -m 700 /var/backups/zhiyu
 install -m 755 db-backup.sh /usr/local/sbin/zhiyu-db-backup
 install -m 644 zhiyu-backend.service /etc/systemd/system/zhiyu-backend.service
 cat > /etc/sudoers.d/zhiyu-deploy <<'EOF'
-zhiyu-deploy ALL=(root) NOPASSWD: /usr/bin/systemctl restart zhiyu-backend.service, /usr/bin/systemctl stop zhiyu-backend.service, /usr/local/sbin/zhiyu-db-backup
+zhiyu-deploy ALL=(root) NOPASSWD: /usr/bin/systemctl restart zhiyu-backend.service, /usr/bin/systemctl stop zhiyu-backend.service, /usr/bin/systemctl reset-failed zhiyu-backend.service, /usr/local/sbin/zhiyu-db-backup
 EOF
 chmod 440 /etc/sudoers.d/zhiyu-deploy
 visudo -cf /etc/sudoers.d/zhiyu-deploy

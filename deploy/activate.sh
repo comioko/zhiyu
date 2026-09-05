@@ -23,7 +23,7 @@ previous_backend=$(readlink "$base/backend/current" || true)
 previous_frontend=$(readlink "$base/frontend/current" || true)
 activated=false
 link_release() {
-  ln -s "$1" "$2.next"
+  ln -sfn -- "$1" "$2.next"
   mv -Tf "$2.next" "$2"
 }
 rollback() {
@@ -34,7 +34,10 @@ rollback() {
     if [[ "$components" == all ]]; then
       if [[ -n "$previous_backend" ]]; then
         link_release "$previous_backend" "$base/backend/current"
-        sudo -n /usr/bin/systemctl restart zhiyu-backend.service || true
+        sudo -n /usr/bin/systemctl reset-failed zhiyu-backend.service || true
+        if ! sudo -n /usr/bin/systemctl restart zhiyu-backend.service; then
+          echo 'Previous backend could not restart; server attention is required.' >&2
+        fi
       else
         sudo -n /usr/bin/systemctl stop zhiyu-backend.service || true
         rm -f "$base/backend/current"
@@ -56,6 +59,7 @@ if [[ "$components" == all ]]; then
   sudo -n /usr/local/sbin/zhiyu-db-backup
   activated=true
   link_release "$destination/backend" "$base/backend/current"
+  sudo -n /usr/bin/systemctl reset-failed zhiyu-backend.service
   sudo -n /usr/bin/systemctl restart zhiyu-backend.service
   healthy=false
   for attempt in {1..90}; do
@@ -67,6 +71,8 @@ if [[ "$components" == all ]]; then
   done
   [[ "$healthy" == true ]] || { echo 'Backend did not become healthy'; exit 1; }
   curl -fsS --max-time 15 'http://127.0.0.1:8080/api/v1/knowposts/feed?page=1&size=1' -o /dev/null
+  curl -fsS --max-time 15 -H 'Host: 113.20.8.115' http://127.0.0.1/healthz -o /dev/null
+  curl -fsS --max-time 15 -H 'Host: 113.20.8.115' 'http://127.0.0.1/api/v1/knowposts/feed?page=1&size=1' -o /dev/null
 fi
 activated=true
 link_release "$destination/frontend" "$base/frontend/current"
@@ -79,6 +85,7 @@ rmdir "$incoming"
 mapfile -t old_releases < <(find "$base/releases" -mindepth 1 -maxdepth 1 -type d -printf '%T@ %p\n' | sort -rn | tail -n +6 | cut -d' ' -f2-)
 for old in "${old_releases[@]}"; do
   [[ "$old/backend" != "$(readlink "$base/backend/current")" && "$old/frontend" != "$(readlink "$base/frontend/current")" ]] || continue
+  [[ "$old/backend" != "$previous_backend" && "$old/frontend" != "$previous_frontend" ]] || continue
   rm -rf -- "$old"
 done
 echo "Deployed $release"
