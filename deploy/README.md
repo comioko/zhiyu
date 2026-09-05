@@ -27,13 +27,23 @@
 
 ## 本次服务器状态与部署开关
 
-2026-09-05 检查时服务器可用物理内存总量约 457 MiB，已有 Java 21、Nginx 和 Redis，没有 MySQL、Kafka、Elasticsearch。原 `moehair-backend` 服务引用不存在的占位 jar 文件并持续失败，配置备份在 `/root/zhiyu-backup-20260905`，旧服务已停用。
+服务器配置为 512 MiB，Linux 可使用约 457 MiB，另有约 1 GiB Swap。原 `moehair-backend` 服务引用不存在的占位 jar 文件并持续失败，配置备份在 `/root/zhiyu-backup-20260905`，旧服务已停用。
 
-完整部署建议至少 4 GB、优先 8 GB 内存，或使用外部数据库、Kafka 和 Elasticsearch。升级或外部服务方案尚未确定，因此仓库变量 **`DEPLOY_COMPONENTS=frontend`**：每次总仓库 main push 都构建和检查前后端，但仅自动发布前端。前端页面可打开，依赖后端的登录、数据等功能在后端启动前不可用。
+2026-09-06 按用户要求完成低内存试跑：Java 21 后端启用 `prod,lite`，使用新建的本地 MariaDB 10.11.18 数据库 `zhiguang` 与现有 Redis 的 **DB 1**。数据库没有迁入历史内容。后端、数据库仅监听本地地址；Nginx 提供公网入口。原有监控、代理和前端保持运行。
 
-后端运行条件准备好后，在服务器安装 MySQL 8、配置 `/etc/zhiyu/backend.env`、RSA 密钥和数据库备份账号，再将仓库变量改为 `all`，手动运行 `Build and deploy Zhiyu` 即可发布完整版本。`prod,lite` 是可选精简配置，需要明确接受无 AI/RAG、Elasticsearch 搜索和 Kafka 异步同步能力；不能视作完整功能部署。
+仓库变量 **`DEPLOY_COMPONENTS=all`** 已启用：总仓库 main push 会更新前端和后端，后端继续使用服务器保存的轻量配置。`all` 表示发布两个组件，并不启用全部业务依赖。完整功能仍建议至少 4 GB、优先 8 GB 内存，或使用外部服务。
 
-后端配置至少包含 `SPRING_PROFILES_ACTIVE`、`JAVA_OPTS`、`SERVER_ADDRESS=127.0.0.1`、数据库、Redis、OSS、邮件、AI/ES/Kafka（完整模式）配置，以及 `JWT_PRIVATE_KEY=file:/etc/zhiyu/keys/private.pem`、`JWT_PUBLIC_KEY=file:/etc/zhiyu/keys/public.pem`、`BACKEND_LOG_FILE=/var/log/zhiyu/app.log`。具体变量见后端的安全生产配置。配置文件用 `root:zhiyu 0640`，密钥文件用 `root:zhiyu 0640`。
+实机验证了 Flyway V1/V2，以及 18 项串行 HTTP 检查：健康、公开列表、验证码生成、注册、密码登录、JWT、个人/关注/推荐列表、通知、刷新令牌旋转和退出。临时测试账户已清理。低频观察中首页接口中位耗时约 24 ms，可用内存约 86–110 MiB，Swap 用量约 100–120 MiB；无 OOM 或服务重启。这是空库、低频试跑结果，不能外推到多人并发或大量内容。
+
+轻量版不提供 AI/RAG、Elasticsearch 搜索、Kafka/Canal 异步同步。当前代码的验证码发送器仅写服务器日志，不发真实邮件/短信；实机认证检查使用临时测试邮箱验证内部链路。OSS 凭据尚未配置，图片、头像和正文上传尚不可用。
+
+### 低内存配置
+
+`low-memory/` 保存这次实测的无秘密配置模板：`backend.conf` 和 `mariadb.conf` 安装到各自 systemd 服务的 `20-low-memory.conf`，`mariadb.cnf` 安装到 `/etc/mysql/mariadb.conf.d/99-zhiyu-low-memory.cnf`。文件注释包含完整目标路径。安装后执行 `systemctl daemon-reload`，数据库参数需重启 MariaDB 才生效；应用参数在下次后端重启生效。已部署服务器上这些配置均已应用，后端与数据库已设置开机启动。
+
+Java 堆上限为 144 MiB，进程还会使用元空间、线程栈和原生内存；systemd 将后端内存限制为 320 MiB、Swap 限制为 128 MiB，防止无限占用。MariaDB 缓冲池为 32 MiB、最多 12 个连接。扩大部署规模前需要重新评估这些上限。
+
+后端配置保存在 `/etc/zhiyu/backend.env`：`SPRING_PROFILES_ACTIVE=prod,lite`、`SERVER_ADDRESS=127.0.0.1`、数据库、Redis 等，以及 `JWT_PRIVATE_KEY=file:/etc/zhiyu/keys/private.pem`、`JWT_PUBLIC_KEY=file:/etc/zhiyu/keys/public.pem`。`JAVA_OPTS` 由上述 systemd 配置提供，当前日志写 journald。数据库应用账号只获得 `zhiguang` 库权限。配置文件和密钥为 `root:zhiyu 0640`。完整模式所需变量见后端的安全生产配置。
 
 数据库备份配置 `/etc/zhiyu/database.cnf` 为标准 MySQL `[client]` 配置，包含备份用户连接信息，只允许 root 读取（0600）。备份目标数据库为 `zhiguang`。`bootstrap.sh` 仅创建发布目录、运行用户、最小 sudo 权限、Nginx 和 systemd 配置，不安装数据库、不启动后端。完成后端配置后再启用 `systemctl enable zhiyu-backend`。
 
@@ -52,7 +62,7 @@ GitHub Actions 使用 `zhiyu-deploy` 用户与独立部署 SSH 密钥连接服�
 git push origin main
 # 手动重新构建和部署
 gh workflow run deploy.yml -R comioko/zhiyu
-# SSH 到服务器后查看后端（仅启用完整发布后）
+# SSH 到服务器后查看后端
 systemctl status zhiyu-backend
 journalctl -u zhiyu-backend -n 100 --no-pager
 cat /srv/zhiyu/DEPLOYED_REVISION

@@ -156,7 +156,7 @@ npm run dev
 
 ### 云服务器 + GitHub 自动部署
 
-总仓库 `comioko/zhiyu` 的 `main` 分支已添加 GitHub Actions：构建前后端、验证后端启动与数据库迁移，通过独立 SSH 密钥发布到 `113.20.8.115`。发布采用独立版本目录与健康检查，失败恢复上一应用版本。当前服务器仅约 457 MiB 内存，先启用前端自动发布，后端等待容量/外部依赖方案确定。详情见 [服务器部署说明](deploy/README.md)。
+总仓库 `comioko/zhiyu` 的 `main` 分支已添加 GitHub Actions：构建前后端、验证后端启动与数据库迁移，通过独立 SSH 密钥发布到 `113.20.8.115`。发布采用独立版本目录与健康检查，失败恢复上一应用版本。当前 512 MiB 服务器已运行前端和 `prod,lite` 后端，使用低内存 MariaDB 与 Redis；main push 会更新两者。轻量模式暂不提供 AI、搜索和 Kafka 异步能力，验证码发送与 OSS 上传也尚未接通。详情及实测限制见 [服务器部署说明](deploy/README.md)。
 
 ### 前端 → Cloudflare Pages
 ```bash
